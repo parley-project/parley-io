@@ -1,5 +1,17 @@
 # Changelog
 
+## parley-io 1.0.0 (unreleased)
+
+BjlIo is now **parley-io**, part of the Parley library family. The code is the same as
+BjlIo 1.1.1 (below); only names changed.
+
+### Changed (needs a code change)
+
+- Maven coordinates: `us.bringardner:bjl_io` is now `us.bringardner.parley:parley-io`.
+- Packages: `us.bringardner.io` is now `us.bringardner.parley.io`.
+- Module name (`Automatic-Module-Name`): `us.bringardner.io` is now `us.bringardner.parley.io`.
+- The tests now use `us.bringardner.parley:parley-core` instead of `us.bringardner:bjl_core`.
+
 ## 1.1.1 (unreleased)
 
 ### Added

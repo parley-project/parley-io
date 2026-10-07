@@ -1,4 +1,4 @@
-# BjlIo
+# parley-io
 
 Small, dependency-free Java classes for reading and writing lines of text with an
 explicit line terminator, plus a few useful stream wrappers.
@@ -6,7 +6,7 @@ explicit line terminator, plus a few useful stream wrappers.
 `BufferedReader.readLine()` accepts any of `\n`, `\r` or `\r\n` as the end of a line,
 and `PrintWriter.println()` writes whatever the local OS uses. That is fine for local
 files, but Internet protocols (SMTP, HTTP, FTP, POP3, ...) define the end of line
-exactly, usually as CR LF. BjlIo lets you say which terminator you mean, so the same
+exactly, usually as CR LF. parley-io lets you say which terminator you mean, so the same
 code behaves the same way on every OS.
 
 - Java 11 or later
@@ -35,15 +35,20 @@ The line readers and writers:
 
 ## Installation
 
-The artifact is published to GitHub Packages:
+parley-io is part of **Parley**, a family of Java libraries for implementing internet
+protocols. It is published to GitHub Packages (and, once released there, Maven Central):
 
 ```xml
 <dependency>
-    <groupId>us.bringardner</groupId>
-    <artifactId>bjl_io</artifactId>
-    <version>1.1.0</version>
+    <groupId>us.bringardner.parley</groupId>
+    <artifactId>parley-io</artifactId>
+    <version>1.0.0</version>
 </dependency>
 ```
+
+> parley-io was previously `us.bringardner:bjl_io` (BjlIo), with packages under
+> `us.bringardner.io`. Moving over means changing the dependency and replacing
+> `us.bringardner.io` with `us.bringardner.parley.io` in imports.
 
 GitHub Packages needs authentication even for public packages. Add the repository to
 your `pom.xml`:
@@ -52,7 +57,7 @@ your `pom.xml`:
 <repositories>
     <repository>
         <id>github</id>
-        <url>https://maven.pkg.github.com/tony-bringardner/BjlIo</url>
+        <url>https://maven.pkg.github.com/tony-bringardner/parley-io</url>
     </repository>
 </repositories>
 ```
@@ -194,7 +199,7 @@ properties in `pom.xml`, or for a single run:
 mvn verify -Djacoco.minLineCoverage=0.95
 ```
 
-The tests use `us.bringardner:bjl_core`, which is also published to GitHub Packages,
+The tests use `us.bringardner.parley:parley-core`, which is also published to GitHub Packages,
 so the `settings.xml` credentials above are needed to build.
 
 ## License

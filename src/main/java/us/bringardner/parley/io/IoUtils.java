@@ -23,7 +23,7 @@
  *
  * ~version~V000.00.01-V000.00.00-
  */
-package us.bringardner.io;
+package us.bringardner.parley.io;
 
 /**
  * Small I/O helpers shared by the BJL projects.

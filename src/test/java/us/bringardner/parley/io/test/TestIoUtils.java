@@ -20,7 +20,7 @@
  *
  *	@author Tony Bringardner
  */
-package us.bringardner.io.test;
+package us.bringardner.parley.io.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
-import us.bringardner.io.IoUtils;
+import us.bringardner.parley.io.IoUtils;
 
 public class TestIoUtils {
 

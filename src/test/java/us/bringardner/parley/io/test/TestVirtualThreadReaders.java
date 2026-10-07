@@ -1,4 +1,4 @@
-package us.bringardner.io.test;
+package us.bringardner.parley.io.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
-import us.bringardner.io.CRLFLineReader;
-import us.bringardner.io.LFLineReader;
+import us.bringardner.parley.io.CRLFLineReader;
+import us.bringardner.parley.io.LFLineReader;
 
 /**
  * BJL-55: many virtual threads, each blocked in readLine() on its own socket, must not hold

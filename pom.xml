@@ -2,38 +2,31 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>bjl_io</artifactId>
-	<name>Bringardner Java Library IO</name>
-	<groupId>us.bringardner</groupId>
-	<version>1.1.1-SNAPSHOT</version>
+	<!-- License, developer, SCM, URL, Java level and the Maven Central release profile
+	     all come from parley-parent. -->
+	<parent>
+		<groupId>us.bringardner.parley</groupId>
+		<artifactId>parley-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../parley-parent/pom.xml</relativePath>
+	</parent>
+
+	<artifactId>parley-io</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<name>Parley IO</name>
 	<description>
-		The IO project contains a few helpful classes for reading and
-		writing lines of text. The end of a line (EOL) of text varies from one
-		OS to another, but,
-		an Internet protocol is NOT system dependent so this package make it
-		easy to clearly define and use the EOL you need.
+		Classes for reading and writing lines of text with an explicit end of line (EOL).
+		The EOL varies from one OS to another, but an Internet protocol is NOT system
+		dependent, so this package makes it easy to clearly define and use the EOL you need.
+		Formerly us.bringardner:bjl_io.
 	</description>
-	<url>https://github.com/tony-bringardner/BjlIo</url>
 	<inceptionYear>1998</inceptionYear>
-
-	<licenses>
-		<license>
-			<name>Apache License, Version 2.0</name>
-			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-
-	<scm>
-		<url>https://github.com/tony-bringardner/BjlIo</url>
-		<connection>scm:git:https://github.com/tony-bringardner/BjlIo.git</connection>
-		<developerConnection>scm:git:https://github.com/tony-bringardner/BjlIo.git</developerConnection>
-	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<maven.compiler.release>11</maven.compiler.release>
+		<!-- Written to the jar manifest as Automatic-Module-Name (was us.bringardner.io) -->
+		<parley.moduleName>us.bringardner.parley.io</parley.moduleName>
 		<junit.version>5.11.4</junit.version>
 		<jacoco.version>0.8.13</jacoco.version>
 		<!-- 'mvn verify' fails if coverage of the whole project drops below these ratios -->
@@ -47,19 +40,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-			</plugin>
-			<!-- A fixed module name for projects that use Java modules (no module-info.java needed) -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.4.2</version>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Automatic-Module-Name>us.bringardner.io</Automatic-Module-Name>
-						</manifestEntries>
-					</archive>
-				</configuration>
 			</plugin>
 			<!-- JaCoCo code coverage: 'mvn verify' writes the report to target/site/jacoco/index.html -->
 			<plugin>
@@ -163,27 +143,19 @@
 		<repository>
 			<id>github</id>
 			<name>tony-bringardner</name>
-			<url>https://maven.pkg.github.com/tony-bringardner/BjlIo</url>
+			<url>https://maven.pkg.github.com/tony-bringardner/parley-io</url>
 		</repository>
 
 	</distributionManagement>
 
 
-	<!-- Where bjl_core (used by the tests) is published. GitHub Packages always needs a login:
-	     add a <server> with id 'github' and a token with read:packages to ~/.m2/settings.xml -->
-	<repositories>
-		<repository>
-			<id>github</id>
-			<url>https://maven.pkg.github.com/tony-bringardner/BjlCore</url>
-		</repository>
-	</repositories>
 
 	<dependencies>
-		<!-- bjl_core is only used by the tests (BaseThread), so it is not passed on to projects that use bjl_io. -->
+		<!-- parley-core is only used by the tests (BaseThread), so it is not passed on to projects that use parley-io. -->
 		<dependency>
-			<groupId>us.bringardner</groupId>
-			<artifactId>bjl_core</artifactId>
-			<version>1.3.1-SNAPSHOT</version>
+			<groupId>us.bringardner.parley</groupId>
+			<artifactId>parley-core</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- junit-jupiter includes the API (to compile tests) and the engine (to run them) -->

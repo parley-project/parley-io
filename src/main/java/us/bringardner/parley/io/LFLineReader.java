@@ -23,7 +23,7 @@
  *
  * ~version~V000.00.01-V000.00.00-
  */
-package us.bringardner.io;
+package us.bringardner.parley.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -34,68 +34,38 @@ import java.nio.charset.Charset;
 
 /**
  * @author Tony Bringardner
- * InputStream that reads lines terminated by CRLF pair.
- * A lone CR or LF is considered part of the line.
+ * InputStream that reads lines terminated by a LF
  * 
- * Sub-classing FilterInputStream allows this class to be used
- * as an InputStream.  However, it's probably not a good idea since 
- * that would violate the basic assumptions of the protocol.
- *   
+ *
  */
-public class CRLFLineReader extends AbstractLineReader {
+public class LFLineReader extends AbstractLineReader {
 
-	/**
-	 * Construct a CRLFInputStream from a File.
-	 * 
-	 * @param inputFile the file to read.
-	 * @throws FileNotFoundException
-	 */
-	public CRLFLineReader(File inputFile) throws FileNotFoundException {
+	public LFLineReader(File inputFile) throws FileNotFoundException {
 		this(new FileInputStream(inputFile));
 	}
 
-	/**
-	 * Construct a CRLFInputStream from a File.
-	 * 
-	 * @param inputFile the file to read.
-	 * @param charset used to convert bytes to a String.
-	 * @throws FileNotFoundException
-	 */
-	public CRLFLineReader(File inputFile, Charset charset) throws FileNotFoundException {
+	public LFLineReader(File inputFile, Charset charset) throws FileNotFoundException {
 		this(new FileInputStream(inputFile), charset);
 	}
 
 	/**
-	 * Construct a CRLFInputStream from the provided InputStream (lines are decoded as UTF-8).
-	 * 
+	 * Lines are decoded as UTF-8.
 	 * @param in
 	 */
-	public CRLFLineReader(InputStream in) {
+	public LFLineReader(InputStream in) {
 		this(in, DEFAULT_CHARSET);
 	}
 
-	/**
-	 * Construct a CRLFInputStream from the provided InputStream.
-	 * 
-	 * @param in
-	 * @param charset used to convert bytes to a String.
-	 */
-	public CRLFLineReader(InputStream in, Charset charset) {
+	public LFLineReader(InputStream in, Charset charset) {
 		super(in, charset);
 	}
 
-	/**
-	 * Construct a CRLFInputStream that will read lines
-	 * from the provided String.
-	 * 
-	 * @param str
-	 */
-	public CRLFLineReader(String str) {
+	public LFLineReader(String str) {
 		this(new ByteArrayInputStream(str.getBytes(DEFAULT_CHARSET)));
 	}
 
 	@Override
 	protected boolean isCrlfTerminated() {
-		return true;
+		return false;
 	}
 }

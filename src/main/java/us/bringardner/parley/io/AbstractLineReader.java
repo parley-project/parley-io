@@ -23,11 +23,11 @@
  *
  * ~version~V000.00.00-
  */
-package us.bringardner.io;
+package us.bringardner.parley.io;
 
-import static us.bringardner.io.IoConstants.CR;
-import static us.bringardner.io.IoConstants.DEFAULT_BUFFER_SIZE;
-import static us.bringardner.io.IoConstants.NL;
+import static us.bringardner.parley.io.IoConstants.CR;
+import static us.bringardner.parley.io.IoConstants.DEFAULT_BUFFER_SIZE;
+import static us.bringardner.parley.io.IoConstants.NL;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -178,7 +178,7 @@ public abstract class AbstractLineReader extends FilterInputStream implements IL
 	 * longer than the timeout had the start of the line cut off.
 	 *
 	 * @return the next line or null if the EOF was reached before any data was read.
-	 * @see us.bringardner.io.ILineReader#readLine()
+	 * @see us.bringardner.parley.io.ILineReader#readLine()
 	 */
 	@Override
 	public String readLine() throws IOException {
@@ -355,7 +355,7 @@ public abstract class AbstractLineReader extends FilterInputStream implements IL
 	}
 
 	/*
-	 * @see us.bringardner.io.ILineReader#getBytesIn()
+	 * @see us.bringardner.parley.io.ILineReader#getBytesIn()
 	 */
 	@Override
 	public long getBytesIn() {

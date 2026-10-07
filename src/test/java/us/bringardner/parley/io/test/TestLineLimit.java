@@ -20,7 +20,7 @@
  *
  *	@author Tony Bringardner
  */
-package us.bringardner.io.test;
+package us.bringardner.parley.io.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -35,11 +35,11 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
-import us.bringardner.io.AbstractLineReader;
-import us.bringardner.io.CRLFLineReader;
-import us.bringardner.io.IoConstants;
-import us.bringardner.io.LFLineReader;
-import us.bringardner.io.LineTooLongException;
+import us.bringardner.parley.io.AbstractLineReader;
+import us.bringardner.parley.io.CRLFLineReader;
+import us.bringardner.parley.io.IoConstants;
+import us.bringardner.parley.io.LFLineReader;
+import us.bringardner.parley.io.LineTooLongException;
 
 /**
  * AbstractLineReader.setMaxLineLength

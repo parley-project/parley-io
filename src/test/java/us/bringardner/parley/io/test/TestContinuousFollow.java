@@ -20,7 +20,7 @@
  *
  *	@author Tony Bringardner
  */
-package us.bringardner.io.test;
+package us.bringardner.parley.io.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -44,8 +44,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import us.bringardner.io.ContinuousInputStream;
-import us.bringardner.io.LineTooLongException;
+import us.bringardner.parley.io.ContinuousInputStream;
+import us.bringardner.parley.io.LineTooLongException;
 
 /**
  * ContinuousInputStream follows a file that is moved (or deleted) and replaced, limits the length

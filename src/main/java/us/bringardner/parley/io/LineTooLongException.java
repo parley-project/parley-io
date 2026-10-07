@@ -1,8 +1,8 @@
 /**
  * <PRE>
- * 
+ *
  * Copyright Tony Bringarder 1998, 2025 <A href="http://bringardner.com/tony">Tony Bringardner</A>
- * 
+ *
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,17 +16,32 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *  </PRE>
- *   
- *   
- *	@author Tony Bringardner   
  *
  *
- * ~version~V000.00.01-V000.00.00-
+ *	@author Tony Bringardner
  */
-package us.bringardner.io;
+package us.bringardner.parley.io;
 
-public interface IStreamMonitor {
-	public void start();
-	public void update(long total, long transfered);
-	public void complete(long total);
+import java.io.IOException;
+
+/**
+ * Thrown by {@link AbstractLineReader#readLine()} when a line is longer than
+ * {@link AbstractLineReader#setMaxLineLength(int)} allows.
+ */
+public class LineTooLongException extends IOException {
+
+	private static final long serialVersionUID = 1L;
+	private final int maxLineLength;
+
+	public LineTooLongException(int maxLineLength) {
+		super("line longer than "+maxLineLength+" bytes");
+		this.maxLineLength = maxLineLength;
+	}
+
+	/**
+	 * @return the limit that was exceeded.
+	 */
+	public int getMaxLineLength() {
+		return maxLineLength;
+	}
 }

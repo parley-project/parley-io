@@ -19,7 +19,7 @@
 */
 
 
-package us.bringardner.io;
+package us.bringardner.parley.io;
 
 import java.io.File;
 import java.io.IOException;

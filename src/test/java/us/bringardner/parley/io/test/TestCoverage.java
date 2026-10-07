@@ -20,7 +20,7 @@
  *
  *	@author Tony Bringardner
  */
-package us.bringardner.io.test;
+package us.bringardner.parley.io.test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,21 +48,21 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import us.bringardner.io.AbstractLineReader;
-import us.bringardner.io.AbstractLineWriter;
-import us.bringardner.io.CRLFLineReader;
-import us.bringardner.io.CRLFLineWriter;
-import us.bringardner.io.ContinuousInputStream;
-import us.bringardner.io.IStreamMonitor;
-import us.bringardner.io.IoConstants;
-import us.bringardner.io.LFLineReader;
-import us.bringardner.io.LFLineWriter;
-import us.bringardner.io.LineTooLongException;
-import us.bringardner.io.MonitoredInputStream;
-import us.bringardner.io.MonitoredOutputStream;
-import us.bringardner.io.TeeOutputStream;
-import us.bringardner.io.TelnetInputStream;
-import us.bringardner.io.TelnetOutputStream;
+import us.bringardner.parley.io.AbstractLineReader;
+import us.bringardner.parley.io.AbstractLineWriter;
+import us.bringardner.parley.io.CRLFLineReader;
+import us.bringardner.parley.io.CRLFLineWriter;
+import us.bringardner.parley.io.ContinuousInputStream;
+import us.bringardner.parley.io.IStreamMonitor;
+import us.bringardner.parley.io.IoConstants;
+import us.bringardner.parley.io.LFLineReader;
+import us.bringardner.parley.io.LFLineWriter;
+import us.bringardner.parley.io.LineTooLongException;
+import us.bringardner.parley.io.MonitoredInputStream;
+import us.bringardner.parley.io.MonitoredOutputStream;
+import us.bringardner.parley.io.TeeOutputStream;
+import us.bringardner.parley.io.TelnetInputStream;
+import us.bringardner.parley.io.TelnetOutputStream;
 
 /**
  * Tests for the code paths the other tests don't reach (constructors, the InputStream /

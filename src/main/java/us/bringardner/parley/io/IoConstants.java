@@ -23,12 +23,12 @@
  *
  * ~version~V000.00.01-V000.00.00-
  */
-package us.bringardner.io;
+package us.bringardner.parley.io;
 
 /**
  * Constants used by the classes in this package.
  * <p>
- * Refer to them as {@code IoConstants.CR} (or with {@code import static us.bringardner.io.IoConstants.*;}).
+ * Refer to them as {@code IoConstants.CR} (or with {@code import static us.bringardner.parley.io.IoConstants.*;}).
  */
 public final class IoConstants {
 

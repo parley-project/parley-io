@@ -24,9 +24,9 @@
  * ~version~V000.00.01-V000.00.00-
  */
 // ~version~V000.00.01-V000.00.00-
-package us.bringardner.io;
+package us.bringardner.parley.io;
 
-import static us.bringardner.io.IoConstants.DEFAULT_BUFFER_SIZE;
+import static us.bringardner.parley.io.IoConstants.DEFAULT_BUFFER_SIZE;
 
 /**
  * @author Tony Bringardner
@@ -167,7 +167,7 @@ public abstract class AbstractLineWriter  extends FilterOutputStream implements 
 	}
 	
 	/* (non-Javadoc)
-	 * @see us.bringardner.io.LineWriter#isAutoFlush()
+	 * @see us.bringardner.parley.io.LineWriter#isAutoFlush()
 	 */
 	@Override
 	public boolean isAutoFlush() {
@@ -176,7 +176,7 @@ public abstract class AbstractLineWriter  extends FilterOutputStream implements 
 	}
 	
 	/* (non-Javadoc)
-	 * @see us.bringardner.io.LineWriter#setAutoFlush(boolean)
+	 * @see us.bringardner.parley.io.LineWriter#setAutoFlush(boolean)
 	 */
 	@Override
 	public void setAutoFlush(boolean autoFlush) {

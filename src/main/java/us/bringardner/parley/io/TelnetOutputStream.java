@@ -18,7 +18,7 @@
  *	@author Tony Bringardner   
  */
 
-package us.bringardner.io;
+package us.bringardner.parley.io;
 
 import java.io.*;
 import java.util.Objects;
