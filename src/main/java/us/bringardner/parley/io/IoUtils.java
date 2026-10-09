@@ -64,4 +64,41 @@ public final class IoUtils {
 			}
 		}
 	}
+
+	/** The buffer size for copying and for buffered file and socket streams. */
+	public static final int BUFFER_SIZE = 64 * 1024;
+
+	/** {@code in} with a {@link #BUFFER_SIZE} buffer (as is if it is already buffered). */
+	public static java.io.InputStream buffered(java.io.InputStream in) {
+		return in instanceof java.io.BufferedInputStream ? in : new java.io.BufferedInputStream(in, BUFFER_SIZE);
+	}
+
+	/** {@code out} with a {@link #BUFFER_SIZE} buffer. */
+	public static java.io.OutputStream buffered(java.io.OutputStream out) {
+		return new java.io.BufferedOutputStream(out, BUFFER_SIZE);
+	}
+
+	/** Copy everything from {@code in} to {@code out}; neither is closed. */
+	public static void copy(java.io.InputStream in, java.io.OutputStream out) throws java.io.IOException {
+		byte[] buf = new byte[BUFFER_SIZE];
+		int n;
+		while ((n = in.read(buf)) > 0) {
+			out.write(buf, 0, n);
+		}
+	}
+
+	/** An output stream whose close() flushes but doesn't close the stream it writes to. */
+	public static java.io.OutputStream noClose(java.io.OutputStream out) {
+		return new java.io.FilterOutputStream(out) {
+			@Override
+			public void write(byte[] b, int off, int len) throws java.io.IOException {
+				out.write(b, off, len);
+			}
+
+			@Override
+			public void close() throws java.io.IOException {
+				flush();
+			}
+		};
+	}
 }
