@@ -5,6 +5,12 @@
 BjlIo is now **parley-io**, part of the Parley library family. The code is the same as
 BjlIo 1.1.1 (below); only names changed.
 
+### Added
+
+- `DotStuffingOutputStream`: writes content as a dot terminated, dot stuffed body (SMTP DATA, POP3
+  RETR / TOP, NNTP), replacing the copies in parley-smtp and parley-pop3. Bare LF always becomes
+  CRLF; bare CR becomes CRLF too with `normalizeCr` (SMTP). `finish()` terminates without closing.
+
 ### Changed (needs a code change)
 
 - Maven coordinates: `us.bringardner:bjl_io` is now `us.bringardner.parley:parley-io`.
