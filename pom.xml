@@ -12,7 +12,7 @@
 	</parent>
 
 	<artifactId>parley-io</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>Parley IO</name>
 	<description>
 		Classes for reading and writing lines of text with an explicit end of line (EOL).
@@ -28,7 +28,6 @@
 		<!-- Written to the jar manifest as Automatic-Module-Name (was us.bringardner.io) -->
 		<parley.moduleName>us.bringardner.parley.io</parley.moduleName>
 		<junit.version>5.11.4</junit.version>
-		<jacoco.version>0.8.13</jacoco.version>
 		<!-- 'mvn verify' fails if coverage of the whole project drops below these ratios -->
 		<jacoco.minLineCoverage>0.90</jacoco.minLineCoverage>
 		<jacoco.minBranchCoverage>0.90</jacoco.minBranchCoverage>
@@ -36,119 +35,70 @@
 
 	<build>
 		<plugins>
-			<!-- Plugins listed only in pluginManagement are NOT executed, so the source jar is declared here. -->
+			<!-- Sources jar attached at package (not deploy) so it exists BEFORE the deploy plugin runs.
+			     The parent's release profile adds the same execution for Maven Central. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
-			<!-- JaCoCo code coverage: 'mvn verify' writes the report to target/site/jacoco/index.html -->
+			<!-- JaCoCo code coverage: 'mvn verify' writes the report to target/site/jacoco/index.html.
+			     If you ever set argLine yourself, use "@{argLine} your-flags" or coverage will be 0%. -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>check</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>${jacoco.minLineCoverage}</minimum>
+										</limit>
+										<limit>
+											<counter>BRANCH</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>${jacoco.minBranchCoverage}</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
-
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.13.0</version>
-					<configuration>
-						<!-- release (not source/target) also checks that only Java 11 APIs are used -->
-						<release>${maven.compiler.release}</release>
-					</configuration>
-				</plugin>
-
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-source-plugin</artifactId>
-					<version>3.3.1</version>
-					<executions>
-						<execution>
-							<id>attach-sources</id>
-							<goals>
-								<goal>jar-no-fork</goal>
-							</goals>
-							<!-- package (not deploy) so the source jar is attached BEFORE the deploy plugin runs -->
-							<phase>package</phase>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>3.1.4</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.5.2</version>
-				</plugin>
-
-				<plugin>
-					<groupId>org.jacoco</groupId>
-					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>${jacoco.version}</version>
-					<executions>
-						<!-- Sets the surefire argLine so the tests run with the JaCoCo agent.
-						     If you ever set argLine yourself, use "@{argLine} your-flags" or coverage will be 0%. -->
-						<execution>
-							<id>prepare-agent</id>
-							<goals>
-								<goal>prepare-agent</goal>
-							</goals>
-						</execution>
-						<execution>
-							<id>report</id>
-							<phase>verify</phase>
-							<goals>
-								<goal>report</goal>
-							</goals>
-						</execution>
-						<execution>
-							<id>check</id>
-							<phase>verify</phase>
-							<goals>
-								<goal>check</goal>
-							</goals>
-							<configuration>
-								<rules>
-									<rule>
-										<element>BUNDLE</element>
-										<limits>
-											<limit>
-												<counter>LINE</counter>
-												<value>COVEREDRATIO</value>
-												<minimum>${jacoco.minLineCoverage}</minimum>
-											</limit>
-											<limit>
-												<counter>BRANCH</counter>
-												<value>COVEREDRATIO</value>
-												<minimum>${jacoco.minBranchCoverage}</minimum>
-											</limit>
-										</limits>
-									</rule>
-								</rules>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-
 	</build>
-
-	<distributionManagement>
-		<repository>
-			<id>github</id>
-			<name>tony-bringardner</name>
-			<url>https://maven.pkg.github.com/tony-bringardner/parley-io</url>
-		</repository>
-
-	</distributionManagement>
-
-
 
 	<dependencies>
 		<!-- parley-core is only used by the tests (BaseThread), so it is not passed on to projects that use parley-io. -->

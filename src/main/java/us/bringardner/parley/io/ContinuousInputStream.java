@@ -1,7 +1,7 @@
 /**
  * <PRE>
  * 
- * Copyright Tony Bringarder 1998, 2025 <A href="http://bringardner.com/tony">Tony Bringardner</A>
+ * Copyright 1998-2026 <A href="http://bringardner.us/tony">Tony Bringardner</A>
  * 
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,6 @@
  *	@author Tony Bringardner   
  *
  *
- * ~version~V000.01.06-V000.00.01-V000.00.00-
  */
 package us.bringardner.parley.io;
 
@@ -79,7 +78,7 @@ public class ContinuousInputStream extends java.io.InputStream {
 	/**
 	 * Guards the buffer, the line and the file position. A lock rather than synchronized methods:
 	 * a read can wait a long time for data, and on Java 21-23 a virtual thread waiting inside a
-	 * synchronized method holds on to its carrier thread (see AbstractLineReader, BJL-55).
+	 * synchronized method holds on to its carrier thread (see AbstractLineReader).
 	 */
 	private final ReentrantLock lock = new ReentrantLock();
 

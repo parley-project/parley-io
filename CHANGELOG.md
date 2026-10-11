@@ -2,14 +2,29 @@
 
 ## parley-io 1.0.0 (unreleased)
 
-BjlIo is now **parley-io**, part of the Parley library family. The code is the same as
-BjlIo 1.1.1 (below); only names changed.
+BjlIo is now **parley-io**, part of the Parley library family. It continues from BjlIo 1.1.0
+(see [BjlIo history](#bjlio-history)); the changes since then are below, with the renames last.
 
 ### Added
 
+- `BufferedLineInput`: reads a connection as bytes, as lines (CRLF or bare LF) and as exact-length
+  blocks (an IMAP literal, an SMTP BDAT chunk). A line interrupted by a read timeout is kept, so reading
+  can resume. A subclass can add its own framing on top of the buffer.
+- `IoUtils.buffered(...)`, `copy(in, out)`, `noClose(out)` and `BUFFER_SIZE` (64 KB): buffered streams,
+  copying, and an output stream whose `close()` only flushes.
 - `DotStuffingOutputStream`: writes content as a dot terminated, dot stuffed body (SMTP DATA, POP3
   RETR / TOP, NNTP), replacing the copies in parley-smtp and parley-pop3. Bare LF always becomes
   CRLF; bare CR becomes CRLF too with `normalizeCr` (SMTP). `finish()` terminates without closing.
+- `IoUtils.closeQuietly(AutoCloseable...)`: close and ignore failures (null safe), replacing the private
+  `closeQuietly` helpers and inline `try { x.close(); } catch {}` blocks in the Parley libraries.
+
+### Removed
+
+- `IoConstants` (`CR`, `NL`, `DEFAULT_BUFFER_SIZE`, `CRNL` and `crlf()`). Nothing in the Parley libraries
+  used it; the readers and writers keep their own private copies.
+- `TelnetInputStream` and `TelnetOutputStream`. Despite the names they didn't implement the Telnet
+  protocol: they echoed what was read to another stream and limited output to 7-bit characters. Nothing
+  in the Parley libraries used them. Use `TeeOutputStream` for echoing.
 
 ### Changed (needs a code change)
 
@@ -18,12 +33,9 @@ BjlIo 1.1.1 (below); only names changed.
 - Module name (`Automatic-Module-Name`): `us.bringardner.io` is now `us.bringardner.parley.io`.
 - The tests now use `us.bringardner.parley:parley-core` instead of `us.bringardner:bjl_core`.
 
-## 1.1.1 (unreleased)
+## BjlIo history
 
-### Added
-
-- `IoUtils.closeQuietly(AutoCloseable...)`: close and ignore failures (null safe), replacing the private
-  `closeQuietly` helpers and inline `try { x.close(); } catch {}` blocks in the BJL projects.
+Releases made before the library became parley-io, as `us.bringardner:bjl_io` (BjlIo).
 
 ## 1.1.0
 

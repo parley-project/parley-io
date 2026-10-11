@@ -1,7 +1,7 @@
 /**
  * <PRE>
  *
- * Copyright Tony Bringarder 1998, 2025 <A href="http://bringardner.com/tony">Tony Bringardner</A>
+ * Copyright 1998-2026 <A href="http://bringardner.us/tony">Tony Bringardner</A>
  *
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
@@ -196,7 +196,7 @@ public class TestContinuousFollow {
 	@Test
 	public void testNoSynchronizedMethods() {
 		//  A read waits a long time; on Java 21-23 a virtual thread waiting in a synchronized
-		//  method holds on to its carrier thread (BJL-55)
+		//  method holds on to its carrier thread
 		for(Method m : ContinuousInputStream.class.getDeclaredMethods()) {
 			assertFalse(Modifier.isSynchronized(m.getModifiers()), m+" should not be synchronized");
 		}

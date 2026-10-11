@@ -1,7 +1,7 @@
 /**
  * <PRE>
  * 
- * Copyright Tony Bringarder 1998, 2025 <A href="http://bringardner.com/tony">Tony Bringardner</A>
+ * Copyright 1998-2026 <A href="http://bringardner.us/tony">Tony Bringardner</A>
  * 
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,6 @@
  *	@author Tony Bringardner   
  *
  *
- * ~version~V000.01.04-V000.01.01-V000.00.01-V000.00.00-
  */
 package us.bringardner.parley.io.test;
 
@@ -67,8 +66,6 @@ import us.bringardner.parley.io.LFLineWriter;
 import us.bringardner.parley.io.MonitoredInputStream;
 import us.bringardner.parley.io.MonitoredOutputStream;
 import us.bringardner.parley.io.TeeOutputStream;
-import us.bringardner.parley.io.TelnetInputStream;
-import us.bringardner.parley.io.TelnetOutputStream;
 
 class TestIo {
 
@@ -594,79 +591,5 @@ class TestIo {
 		}
 	}
 
-	@Test
-	public void testTelnetStreams() throws IOException {
-
-		// Telnet output is restricted to 7-bit characters <= '~' (0x7E)
-		ByteArrayOutputStream bao1 =  new ByteArrayOutputStream();
-		List<Byte> expected = new ArrayList<>();
-		try(TelnetOutputStream tno = new TelnetOutputStream(bao1)) {
-			for(int idx=0; idx < 1024; idx++ ) {
-				tno.write(idx);
-				//Note: This is the logic used by TelnetOutputStream
-				int i = idx & 0x7F;
-				if( i <= '~') {
-					expected.add((byte)i);
-				}
-			}
-		}
-		
-		byte actualData [] = bao1.toByteArray();
-		
-		assertEquals(expected.size(), actualData.length,"TelnetOutputStream did not output the correct number of characters.");
-		
-		for(int idx=0; idx < actualData.length; idx++ ) {			
-			assertEquals(expected.get(idx),actualData[idx],"TelnetOutputStream output does not match expected value.");
-		}
-
-		//  Lower case letters are transmitted, the bulk write gives the same result as single bytes
-		ByteArrayOutputStream bao2 =  new ByteArrayOutputStream();
-		try(TelnetOutputStream tno = new TelnetOutputStream(bao2)) {
-			tno.write("xxHello World\r\n~".getBytes(StandardCharsets.US_ASCII), 2, 13);
-		}
-		assertEquals("Hello World\r\n", bao2.toString());
-
-		//  close flushes and closes the underlying stream
-		ByteArrayOutputStream bao3 =  new ByteArrayOutputStream();
-		TelnetOutputStream tno = new TelnetOutputStream(new java.io.BufferedOutputStream(bao3));
-		tno.write("ABC".getBytes());
-		tno.close();
-		assertEquals("ABC", bao3.toString());
-		
-		StringBuilder buf = new StringBuilder();
-		
-		for(int idx=0; idx < 2; idx++ ) {
-			buf.append(testLine+"\r\n");
-		}
-		
-		
-		ByteArrayInputStream bai = new ByteArrayInputStream(buf.toString().getBytes());
-
-		/*
-		 * TelnetInputStream is just intended to echo data received from
-		 * a remote system onto a display in the local system.
-		 */
-		StringBuilder buf2 = new StringBuilder();
-		ByteArrayOutputStream bao =  new ByteArrayOutputStream();
-		try(TelnetInputStream in = new TelnetInputStream(bai, bao)){
-			int i = in.read();
-			while( i>=0 ) {
-				buf2.append((char)i);
-				i = in.read();
-			}			
-		}
-
-		String actualEcho = new String(bao.toByteArray());		
-		assertEquals(buf.toString(),buf2.toString(),"TelnetInputStream input does not match expected value.");
-		assertEquals(buf.toString(),actualEcho,"TelnetInputStream ECHO does not match expected value.");
-
-		//  Bulk reads are echoed too
-		ByteArrayOutputStream echo =  new ByteArrayOutputStream();
-		try(TelnetInputStream in = new TelnetInputStream(new ByteArrayInputStream(buf.toString().getBytes()), echo)){
-			byte [] b = in.readAllBytes();
-			assertEquals(buf.toString(), new String(b));
-		}
-		assertEquals(buf.toString(), echo.toString());
-	}
 
 }

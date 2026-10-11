@@ -1,7 +1,7 @@
 /**
  * <PRE>
  * 
- * Copyright Tony Bringarder 1998, 2025 <A href="http://bringardner.com/tony">Tony Bringardner</A>
+ * Copyright 1998-2026 <A href="http://bringardner.us/tony">Tony Bringardner</A>
  * 
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,12 +21,8 @@
  *	@author Tony Bringardner   
  *
  *
- * ~version~V000.00.01-V000.00.00-
  */
-// ~version~V000.00.01-V000.00.00-
 package us.bringardner.parley.io;
-
-import static us.bringardner.parley.io.IoConstants.DEFAULT_BUFFER_SIZE;
 
 /**
  * @author Tony Bringardner
@@ -56,6 +52,9 @@ public abstract class AbstractLineWriter  extends FilterOutputStream implements 
 {
 	/** The Charset used when a Charset is not provided. */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+
+	/** The buffer size of a writer that writes to a file. */
+	private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
 	//  Read by other threads (e.g. idle time-out monitors) so they must be volatile / atomic.
 	//  AtomicLong so no counts are lost when several threads write at the same time.

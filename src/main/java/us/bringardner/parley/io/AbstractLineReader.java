@@ -1,7 +1,7 @@
 /**
  * <PRE>
  *
- * Copyright Tony Bringarder 1998, 2025 <A href="http://bringardner.com/tony">Tony Bringardner</A>
+ * Copyright 1998-2026 <A href="http://bringardner.us/tony">Tony Bringardner</A>
  *
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,13 +21,8 @@
  *	@author Tony Bringardner
  *
  *
- * ~version~V000.00.00-
  */
 package us.bringardner.parley.io;
-
-import static us.bringardner.parley.io.IoConstants.CR;
-import static us.bringardner.parley.io.IoConstants.DEFAULT_BUFFER_SIZE;
-import static us.bringardner.parley.io.IoConstants.NL;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -54,6 +49,11 @@ public abstract class AbstractLineReader extends FilterInputStream implements IL
 	/** The Charset used when a Charset is not provided. */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+	/** The size of the read buffer, and the line length at which the line buffer starts to be trimmed. */
+	private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
+	private static final int CR = '\r';
+	private static final int NL = '\n';
+
 	private final Charset charset;
 	private final byte [] buf;
 	private int pos;
@@ -68,8 +68,8 @@ public abstract class AbstractLineReader extends FilterInputStream implements IL
 	private volatile int maxLineLength;
 
 	/**
-	 * Guards the buffer and the line being read. A lock instead of synchronized methods
-	 * (BJL-55): readers usually block on a socket while holding it, and on Java 21-23 a
+	 * Guards the buffer and the line being read. A lock instead of synchronized methods:
+	 * readers usually block on a socket while holding it, and on Java 21-23 a
 	 * virtual thread blocked inside a monitor pins its carrier thread, so a server with a
 	 * virtual thread per connection stopped once there were as many idle connections as CPUs.
 	 */

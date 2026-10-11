@@ -1,7 +1,7 @@
 /**
  * <PRE>
  *
- * Copyright Tony Bringarder 1998, 2025 <A href="http://bringardner.com/tony">Tony Bringardner</A>
+ * Copyright 1998-2026 <A href="http://bringardner.us/tony">Tony Bringardner</A>
  *
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +37,6 @@ import org.junit.jupiter.api.Test;
 
 import us.bringardner.parley.io.AbstractLineReader;
 import us.bringardner.parley.io.CRLFLineReader;
-import us.bringardner.parley.io.IoConstants;
 import us.bringardner.parley.io.LFLineReader;
 import us.bringardner.parley.io.LineTooLongException;
 
@@ -45,6 +44,9 @@ import us.bringardner.parley.io.LineTooLongException;
  * AbstractLineReader.setMaxLineLength
  */
 public class TestLineLimit {
+
+	/** The size of the readers' internal buffer. */
+	private static final int READER_BUFFER_SIZE = 4 * 1024;
 
 	private static InputStream bytes(String s) {
 		return new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8));
@@ -132,7 +134,7 @@ public class TestLineLimit {
 		try(CRLFLineReader r = limit(new CRLFLineReader(endless), 8192)) {
 			assertThrows(LineTooLongException.class, r::readLine);
 		}
-		assertTrue(served[0] < 8192 + 2*IoConstants.DEFAULT_BUFFER_SIZE, "read "+served[0]+" bytes");
+		assertTrue(served[0] < 8192 + 2*READER_BUFFER_SIZE, "read "+served[0]+" bytes");
 	}
 
 	@Test

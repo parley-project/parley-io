@@ -23,7 +23,10 @@ code behaves the same way on every OS.
 | `ContinuousInputStream` | Reads a file and waits for more data at the end, like `tail -f`. |
 | `MonitoredInputStream` / `MonitoredOutputStream` | Report progress to an `IStreamMonitor` as data flows through them. |
 | `TeeOutputStream` | Writes the same data to several output streams. |
-| `TelnetInputStream` / `TelnetOutputStream` | Echo everything read to another stream, and restrict output to 7-bit characters up to `~`. |
+| `BufferedLineInput` | Reads a connection as lines and exact-length blocks (an IMAP literal, an SMTP BDAT chunk). A line interrupted by a read timeout is kept so reading can resume. For protocol implementations that need to mix the two. |
+| `DotStuffingOutputStream` | Writes a dot terminated, dot stuffed body: SMTP `DATA`, POP3 `RETR` and `TOP`, NNTP. |
+| `LineTooLongException` | Thrown by `readLine()` when a line is longer than the limit you set. |
+| `IoUtils` | `closeQuietly(...)`, buffered streams, `copy(in, out)` and `noClose(out)`. |
 
 The line readers and writers:
 
@@ -31,7 +34,11 @@ The line readers and writers:
 - use UTF-8 unless you pass another `Charset`;
 - count every byte read or written, line terminators included, so a writer's `getBytesOut()` equals the reader's `getBytesIn()` once everything has been read;
 - record when they last read or wrote (`getLastReadTime()`, `getLastWriteTime()`), which is handy for idle time-outs;
-- return a final line that has no terminator, instead of dropping it.
+- return a final line that has no terminator, instead of dropping it;
+- keep the part of a line that was read when a read fails (a `SocketTimeoutException` on a socket with a
+  read timeout, say), so the next `readLine()` carries on with the same line;
+- use a lock rather than `synchronized` methods, so a virtual thread blocked reading a socket doesn't hold on to
+  its carrier thread on Java 21-23. A server with a virtual thread per connection is fine.
 
 ## Installation
 
@@ -152,6 +159,17 @@ try {
 If the file is truncated, for example by log rotation, reading starts again from the
 beginning. `setFreq(ms)` sets how often the file is checked for new data (40 ms by default).
 
+### Send a message body (SMTP DATA, POP3 RETR)
+
+```java
+try (DotStuffingOutputStream body = new DotStuffingOutputStream(IoUtils.noClose(socket.getOutputStream()))) {
+    body.write(message);        // bare LF becomes CRLF, a leading "." is doubled
+}                               // close() writes the terminating "." line; the socket stays open
+```
+
+Call `finish()` instead of `close()` if you'd rather not wrap the socket stream in `noClose`.
+Use `new DotStuffingOutputStream(out, true)` to turn a bare CR into CRLF too (SMTP).
+
 ### Track progress
 
 ```java
@@ -185,6 +203,8 @@ later errors are attached to it as suppressed exceptions.
 
 ## Building
 
+parley-io is built with a parley-parent POM; it needs JDK 11 or later.
+
 ```
 mvn verify
 ```
@@ -199,10 +219,10 @@ properties in `pom.xml`, or for a single run:
 mvn verify -Djacoco.minLineCoverage=0.95
 ```
 
-The tests use `us.bringardner.parley:parley-core`, which is also published to GitHub Packages,
-so the `settings.xml` credentials above are needed to build.
+The tests use `us.bringardner.parley:parley-core` (a test dependency only; it is not passed on to
+projects that use parley-io).
 
 ## License
 
-Copyright Tony Bringardner. Licensed under the
+Copyright 1998-2026 Tony Bringardner. Licensed under the
 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).

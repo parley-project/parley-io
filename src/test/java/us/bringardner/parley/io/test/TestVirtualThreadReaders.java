@@ -22,7 +22,7 @@ import us.bringardner.parley.io.CRLFLineReader;
 import us.bringardner.parley.io.LFLineReader;
 
 /**
- * BJL-55: many virtual threads, each blocked in readLine() on its own socket, must not hold
+ * Many virtual threads, each blocked in readLine() on its own socket, must not hold
  * all the carrier threads. With synchronized readLine, on Java 21-23 each one pinned a
  * carrier thread, so once there were as many waiting readers as CPUs no other virtual
  * thread could run: the lines below were never read. Needs Java 21+ (skipped before);

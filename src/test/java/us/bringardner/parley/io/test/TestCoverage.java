@@ -1,7 +1,7 @@
 /**
  * <PRE>
  *
- * Copyright Tony Bringarder 1998, 2025 <A href="http://bringardner.com/tony">Tony Bringardner</A>
+ * Copyright 1998-2026 <A href="http://bringardner.us/tony">Tony Bringardner</A>
  *
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,15 +54,12 @@ import us.bringardner.parley.io.CRLFLineReader;
 import us.bringardner.parley.io.CRLFLineWriter;
 import us.bringardner.parley.io.ContinuousInputStream;
 import us.bringardner.parley.io.IStreamMonitor;
-import us.bringardner.parley.io.IoConstants;
 import us.bringardner.parley.io.LFLineReader;
 import us.bringardner.parley.io.LFLineWriter;
 import us.bringardner.parley.io.LineTooLongException;
 import us.bringardner.parley.io.MonitoredInputStream;
 import us.bringardner.parley.io.MonitoredOutputStream;
 import us.bringardner.parley.io.TeeOutputStream;
-import us.bringardner.parley.io.TelnetInputStream;
-import us.bringardner.parley.io.TelnetOutputStream;
 
 /**
  * Tests for the code paths the other tests don't reach (constructors, the InputStream /
@@ -70,6 +67,9 @@ import us.bringardner.parley.io.TelnetOutputStream;
  * Written from the JaCoCo report, see target/site/jacoco/index.html after 'mvn verify'.
  */
 class TestCoverage {
+
+	/** The size of the readers' internal buffer (they trim their line buffer past 4 times this). */
+	private static final int READER_BUFFER_SIZE = 4 * 1024;
 
 	private static final Charset LATIN1 = StandardCharsets.ISO_8859_1;
 
@@ -139,23 +139,6 @@ class TestCoverage {
 		char [] chars = new char[count];
 		Arrays.fill(chars, c);
 		return new String(chars);
-	}
-
-	// ------------------------------------------------------------------------
-	//  IoConstants
-	// ------------------------------------------------------------------------
-
-	@Test
-	@SuppressWarnings("deprecation")
-	void testIoConstants() {
-		assertArrayEquals(new byte[] {'\r','\n'}, IoConstants.CRNL);
-		byte [] crlf = IoConstants.crlf();
-		assertArrayEquals(new byte[] {'\r','\n'}, crlf);
-		//  Every call returns a new copy, so changing one can't affect anyone else.
-		crlf[0] = 'x';
-		assertArrayEquals(new byte[] {'\r','\n'}, IoConstants.crlf());
-		assertEquals('\r', IoConstants.CR);
-		assertEquals('\n', IoConstants.NL);
 	}
 
 	// ------------------------------------------------------------------------
@@ -244,7 +227,7 @@ class TestCoverage {
 
 	@Test
 	void testReaderLargeReadGoesDirectlyToTheStream() throws IOException {
-		byte [] data = new byte[IoConstants.DEFAULT_BUFFER_SIZE * 3];
+		byte [] data = new byte[READER_BUFFER_SIZE * 3];
 		for (int idx = 0; idx < data.length; idx++) {
 			data[idx] = (byte)idx;
 		}
@@ -319,17 +302,17 @@ class TestCoverage {
 		}
 
 		//  Skipping past the buffer goes to the underlying stream, and is counted too.
-		int size = IoConstants.DEFAULT_BUFFER_SIZE * 3;
+		int size = READER_BUFFER_SIZE * 3;
 		try(LFLineReader r = new LFLineReader(new ByteArrayInputStream(new byte[size]))) {
 			assertEquals(100, r.read(new byte[100]));
 			//  The rest of the first buffer fill
-			assertEquals(IoConstants.DEFAULT_BUFFER_SIZE - 100L, r.skip(size));
+			assertEquals(READER_BUFFER_SIZE - 100L, r.skip(size));
 			//  Nothing buffered now, so this is skipped by the underlying stream.
 			assertEquals(1000L, r.skip(1000));
-			assertEquals(IoConstants.DEFAULT_BUFFER_SIZE + 1000L, r.getBytesIn());
+			assertEquals(READER_BUFFER_SIZE + 1000L, r.getBytesIn());
 			//  A large read goes directly to the underlying stream.
 			byte [] big = new byte[size];
-			int rest = size - IoConstants.DEFAULT_BUFFER_SIZE - 1000;
+			int rest = size - READER_BUFFER_SIZE - 1000;
 			assertEquals(rest, r.read(big, 0, big.length));
 			assertEquals(-1, r.read(big, 0, big.length));
 			assertEquals((long)size, r.getBytesIn());
@@ -371,9 +354,9 @@ class TestCoverage {
 
 	@Test
 	void testReaderLineTooLongReleasesLargeBuffer() throws IOException {
-		//  Big enough that the internal line buffer grows past DEFAULT_BUFFER_SIZE * 4 before the limit is hit.
-		int max = IoConstants.DEFAULT_BUFFER_SIZE * 5;
-		String longLine = repeat('a', max + IoConstants.DEFAULT_BUFFER_SIZE * 2);
+		//  Big enough that the internal line buffer grows past READER_BUFFER_SIZE * 4 before the limit is hit.
+		int max = READER_BUFFER_SIZE * 5;
+		String longLine = repeat('a', max + READER_BUFFER_SIZE * 2);
 		try(LFLineReader r = new LFLineReader(longLine + "\nnext\n")) {
 			r.setMaxLineLength(max);
 			assertEquals(max, r.getMaxLineLength());
@@ -673,82 +656,6 @@ class TestCoverage {
 		IOException e = assertThrows(IOException.class, tee::close);
 		assertEquals("close", e.getMessage());
 		assertEquals(0, e.getSuppressed().length);
-	}
-
-	// ------------------------------------------------------------------------
-	//  Telnet streams
-	// ------------------------------------------------------------------------
-
-	@Test
-	void testTelnetInputStreamMethods() throws IOException {
-		ByteArrayOutputStream echo = new ByteArrayOutputStream();
-		try(TelnetInputStream in = new TelnetInputStream(new ByteArrayInputStream("abc".getBytes(StandardCharsets.US_ASCII)), echo)) {
-			assertEquals(3, in.available());
-			assertEquals(0, in.read(new byte[2], 0, 0));
-			byte [] b = new byte[10];
-			assertEquals(3, in.read(b));
-			assertEquals(-1, in.read(b));
-			assertEquals(-1, in.read());
-		}
-		//  Every byte read is echoed.
-		assertEquals("abc", echo.toString("US-ASCII"));
-
-		//  Both streams are required.
-		assertThrows(NullPointerException.class, () -> new TelnetInputStream(new ByteArrayInputStream(new byte[0]), null));
-		assertThrows(NullPointerException.class, () -> new TelnetInputStream(null, echo));
-	}
-
-	@Test
-	void testTelnetInputStreamCloseLeavesEchoOpen() throws IOException {
-		final boolean [] flushed = {false};
-		final boolean [] closed = {false};
-		ByteArrayOutputStream echo = new ByteArrayOutputStream() {
-			@Override
-			public void flush() {
-				flushed[0] = true;
-			}
-			@Override
-			public void close() {
-				closed[0] = true;
-			}
-		};
-		TelnetInputStream in = new TelnetInputStream(new ByteArrayInputStream(new byte[0]), echo);
-		in.close();
-		assertTrue(flushed[0]);
-		//  The echo stream belongs to the caller (it's often System.out).
-		assertFalse(closed[0]);
-
-		//  An error flushing the echo stream does not stop the input from being closed.
-		final boolean [] inputClosed = {false};
-		InputStream input = new ByteArrayInputStream(new byte[0]) {
-			@Override
-			public void close() {
-				inputClosed[0] = true;
-			}
-		};
-		new TelnetInputStream(input, new FailingOutputStream(false)).close();
-		assertTrue(inputClosed[0]);
-	}
-
-	@Test
-	void testTelnetOutputStreamFiltersCharacters() throws IOException {
-		ByteArrayOutputStream target = new ByteArrayOutputStream();
-		try(TelnetOutputStream out = new TelnetOutputStream(target)) {
-			//  The high bit is removed: 0xC1 -> 'A'
-			out.write(0xC1);
-			//  All printable ASCII is transmitted, including the characters after 'z'
-			out.write('{');
-			//  DEL (0x7F, and 0xFF once the high bit is removed) is dropped
-			out.write(0x7F);
-			out.write(0xFF);
-			out.write("|}~".getBytes(StandardCharsets.US_ASCII), 0, 3);
-			//  All of these are dropped, so nothing is written.
-			out.write(new byte[] {0x7F, (byte)0xFF}, 0, 2);
-			out.write(new byte[] {'x', 'b', (byte)('c' | 0x80), 0x7F}, 1, 3);
-			out.flush();
-		}
-		assertEquals("A{|}~bc", target.toString("US-ASCII"));
-		assertThrows(NullPointerException.class, () -> new TelnetOutputStream(null));
 	}
 
 	// ------------------------------------------------------------------------

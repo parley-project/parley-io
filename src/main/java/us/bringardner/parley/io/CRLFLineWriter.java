@@ -1,8 +1,7 @@
-// ~version~V000.00.00-
 /**
  CRLFWriter.java
 
- Copyright 1998-2009 Tony Bringardner
+ Copyright 1998-2026 Tony Bringardner
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -32,7 +31,7 @@ import java.nio.charset.Charset;
  */
 public class CRLFLineWriter extends AbstractLineWriter implements ILineWriter {
 
-	//  Private copy so changes to the public IoConstants.CRNL array can't affect this class.
+	//  The line terminator; private so no other code can change it.
 	private static final byte [] TERMINATOR = { '\r','\n'};
 
 	/**
