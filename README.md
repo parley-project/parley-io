@@ -159,6 +159,14 @@ try {
 If the file is truncated, for example by log rotation, reading starts again from the
 beginning. `setFreq(ms)` sets how often the file is checked for new data (40 ms by default).
 
+If the file is moved and a new one is created with its name (log rotation by renaming, which
+logrotate does by default), the rest of the old file is read and then the new file from its
+beginning, like `tail -F`. That needs the file system to identify files, as on Linux and macOS.
+**On Windows it isn't done.** Java has no file identity there, so the stream carries on with the
+original file. The stream also holds that file open without allowing it to be renamed or deleted,
+so a program that writes the file can't rotate it by renaming while the stream is open. Close the
+stream before rotating, or follow the file's new name yourself.
+
 ### Send a message body (SMTP DATA, POP3 RETR)
 
 ```java

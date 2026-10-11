@@ -48,8 +48,11 @@ import java.util.concurrent.locks.ReentrantLock;
  * If the file is moved or deleted and a new file is created with the same name (log rotation by
  * renaming, logrotate's default), the rest of the old file is read and then the new file is read from
  * its beginning, like {@code tail -F}. That needs the file's name, so it isn't done for a stream made
- * from a RandomAccessFile, or where the file system doesn't identify files (Windows, which doesn't
- * allow an open file to be moved anyway).
+ * from a RandomAccessFile, or where the file system doesn't identify files (Windows).
+ * <p>
+ * On Windows the stream keeps reading the original file. It also holds that file open without
+ * allowing it to be renamed or deleted (that is how {@link RandomAccessFile} opens a file there), so
+ * a program that writes the file can't rotate it by renaming while the stream is open.
  * If the reading thread is interrupted while waiting for data an {@link InterruptedIOException} is thrown.
  */
 public class ContinuousInputStream extends java.io.InputStream {
