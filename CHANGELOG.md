@@ -7,6 +7,11 @@ BjlIo is now **parley-io**, part of the Parley library family. It continues from
 
 ### Added
 
+- `WireBuffer` and `WireFormatException`: a byte array with read and write positions for binary
+  protocols (big endian u8/u16/u32/u64, 1/2/4-byte length-prefixed bytes). Every read is bounds
+  checked before anything is read or allocated; `pushLimit`/`popLimit` confine reading to a record
+  and check it was all used; `setU16`/`setU32` fill in a length afterwards. DNS messages and SSH
+  packets are built on it (parley-dns `ByteBuffer`, parley-ssh `SshBuffer`).
 - `BufferedLineInput`: reads a connection as bytes, as lines (CRLF or bare LF) and as exact-length
   blocks (an IMAP literal, an SMTP BDAT chunk). A line interrupted by a read timeout is kept, so reading
   can resume. A subclass can add its own framing on top of the buffer.
