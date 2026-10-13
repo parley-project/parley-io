@@ -57,8 +57,15 @@ public class WireBuffer {
 	private byte[] data;
 	private int rpos;
 	private int wpos;
-	//  End of the readable data; -1: the write position
-	private int limit = -1;
+	/** {@link #WireBuffer(byte[], int, int, int)}: reading stops at the write position. */
+	protected static final int TO_WRITE_POSITION = -1;
+	/** {@link #WireBuffer(byte[], int, int, int)}: reading stops at the end of the array (as it grows). */
+	protected static final int TO_ARRAY_END = -2;
+
+	//  End of the readable data, or TO_WRITE_POSITION / TO_ARRAY_END
+	private int limit = TO_WRITE_POSITION;
+	//  A slice: it shares its parent's array, so it can't be written
+	private boolean readOnly;
 
 	/** An empty buffer for writing (256 bytes to start with). */
 	public WireBuffer() {
@@ -92,7 +99,7 @@ public class WireBuffer {
 	 * A buffer over an array with the positions given (for subclasses that read one
 	 * part of an array and write another).
 	 *
-	 * @param readEnd where reading stops, -1 for the write position
+	 * @param readEnd where reading stops, {@link #TO_WRITE_POSITION} or {@link #TO_ARRAY_END}
 	 */
 	protected WireBuffer(byte[] data, int readPosition, int writePosition, int readEnd) {
 		if( readPosition < 0 || writePosition < 0 || writePosition > data.length || readEnd > data.length ) {
@@ -101,7 +108,7 @@ public class WireBuffer {
 		this.data = data;
 		this.rpos = readPosition;
 		this.wpos = writePosition;
-		this.limit = readEnd < 0 ? -1 : readEnd;
+		this.limit = readEnd == TO_ARRAY_END ? TO_ARRAY_END : readEnd < 0 ? TO_WRITE_POSITION : readEnd;
 	}
 
 	/**
@@ -155,7 +162,7 @@ public class WireBuffer {
 
 	/** @return where reading stops: the limit if one is set, else the write position */
 	public int readEnd() {
-		return limit >= 0 ? limit : wpos;
+		return limit >= 0 ? limit : limit == TO_ARRAY_END ? data.length : wpos;
 	}
 
 	/** @return bytes left to read (0 if the read position is past the end) */
@@ -194,12 +201,13 @@ public class WireBuffer {
 	}
 
 	/**
-	 * @return a buffer for reading the next len bytes (sharing the array); this
+	 * @return a read only buffer for the next len bytes (sharing the array); this
 	 *  buffer's read position moves past them
 	 */
 	public WireBuffer slice(int len) {
 		need(len);
 		WireBuffer ret = new WireBuffer(data, rpos, len);
+		ret.readOnly = true;
 		rpos += len;
 		return ret;
 	}
@@ -312,6 +320,9 @@ public class WireBuffer {
 
 	/** Make room for len more bytes at the write position. */
 	protected void ensure(int len) {
+		if( readOnly ) {
+			throw new IllegalStateException("A slice can't be written");
+		}
 		if( len < 0 ) {
 			throw new IllegalArgumentException("length "+len);
 		}
@@ -409,6 +420,7 @@ public class WireBuffer {
 	 * @param v 0 to 65535
 	 */
 	public void setU16(int pos, int v) {
+		ensure(0);
 		checkU16(v);
 		checkWritten(pos, 2);
 		data[pos] = (byte) (v >> 8);
@@ -417,6 +429,7 @@ public class WireBuffer {
 
 	/** Replace four bytes already written (the low 32 bits of v). */
 	public void setU32(int pos, long v) {
+		ensure(0);
 		checkWritten(pos, 4);
 		data[pos] = (byte) (v >> 24);
 		data[pos+1] = (byte) (v >> 16);

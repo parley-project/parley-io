@@ -273,4 +273,28 @@ public class TestWireBuffer {
 		assertEquals(0, past.remaining(), "never negative");
 		assertEquals(0, past.toByteArray().length);
 	}
+
+	@Test
+	public void aSliceCantBeWritten() {
+		WireBuffer p = new WireBuffer(new byte[] {1, 2, 3, 4});
+		WireBuffer s = p.slice(2);
+		assertThrows(IllegalStateException.class, () -> s.putU8(9));
+		assertThrows(IllegalStateException.class, () -> s.setU16(0, 9));
+		assertThrows(IllegalStateException.class, () -> s.setU32(0, 9));
+		assertEquals(3, p.getU8(), "the parent is unchanged");
+	}
+
+	@Test
+	public void readingToTheEndOfAGrowingArray() {
+		WireBuffer b = new Sub(new byte[2], 0, 0, -2);
+		assertEquals(2, b.remaining(), "the array's bytes, written or not");
+		for(int i=0; i < 10; i++ ) {
+			b.putU8(i);
+		}
+		assertTrue(b.remaining() >= 10, "the end moves as the array grows");
+		int saved = b.pushLimit(1);
+		b.getU8();
+		b.popLimit(saved);
+		assertTrue(b.remaining() >= 9, "back to the array end");
+	}
 }
