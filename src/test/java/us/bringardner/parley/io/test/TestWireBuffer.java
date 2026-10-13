@@ -160,4 +160,117 @@ public class TestWireBuffer {
 		IllegalStateException e = assertThrows(IllegalStateException.class, r::getU8);
 		assertTrue(e.getMessage().startsWith("custom: "));
 	}
+
+	static final class Sub extends WireBuffer {
+		Sub(byte[] b, int r, int w, int end) {
+			super(b, r, w, end);
+		}
+	}
+
+	@Test
+	public void readAndWritePartsOfOneArray() {
+		byte[] a = {1, 2, 3, 4};
+		WireBuffer b = new Sub(a, 1, 0, 3);
+		assertEquals(3, b.readEnd());
+		assertEquals(2, b.getU8());
+		assertEquals(3, b.getU8());
+		assertThrows(WireFormatException.class, b::getU8);
+		b.putU8(9);
+		assertEquals(9, a[0]);
+		WireBuffer c = new Sub(a, 0, 2, -1);
+		assertEquals(2, c.readEnd(), "-1: up to the write position");
+		assertThrows(IndexOutOfBoundsException.class, () -> new Sub(a, -1, 0, 3));
+		assertThrows(IndexOutOfBoundsException.class, () -> new Sub(a, 0, 5, 3));
+		assertThrows(IndexOutOfBoundsException.class, () -> new Sub(a, 0, -1, 3));
+		assertThrows(IndexOutOfBoundsException.class, () -> new Sub(a, 0, 0, 5));
+	}
+
+	@Test
+	public void badArgumentsAreRefused() {
+		byte[] a = new byte[4];
+		assertThrows(IndexOutOfBoundsException.class, () -> new WireBuffer(a, -1, 1));
+		assertThrows(IndexOutOfBoundsException.class, () -> new WireBuffer(a, 0, -1));
+		assertThrows(IndexOutOfBoundsException.class, () -> new WireBuffer(a, 2, 3));
+		assertThrows(IndexOutOfBoundsException.class, () -> new WireBuffer(a, 1, Integer.MAX_VALUE));
+		WireBuffer w = new WireBuffer();
+		assertThrows(IndexOutOfBoundsException.class, () -> w.putBytes(a, -1, 1));
+		assertThrows(IndexOutOfBoundsException.class, () -> w.putBytes(a, 0, -1));
+		assertThrows(IndexOutOfBoundsException.class, () -> w.putBytes(a, 3, 2));
+		assertThrows(IndexOutOfBoundsException.class, () -> w.putBytes(a, 1, Integer.MAX_VALUE));
+		assertThrows(IndexOutOfBoundsException.class, () -> w.readPosition(-1));
+		assertThrows(IndexOutOfBoundsException.class, () -> w.readPosition(1));
+		assertThrows(IndexOutOfBoundsException.class, () -> w.writePosition(-1));
+		assertThrows(IndexOutOfBoundsException.class, () -> w.writePosition(100000));
+		assertThrows(IndexOutOfBoundsException.class, () -> w.setU32(-1, 0));
+		assertThrows(IndexOutOfBoundsException.class, () -> w.copyOf(-1, 0));
+		assertThrows(IndexOutOfBoundsException.class, () -> w.copyOf(1, 0));
+		assertThrows(IndexOutOfBoundsException.class, () -> w.copyOf(0, 1));
+	}
+
+	@Test
+	public void wrapReadsAByteBuffer() {
+		java.nio.ByteBuffer heap = java.nio.ByteBuffer.wrap(new byte[] {0, 1, 2, 3});
+		heap.position(1);
+		WireBuffer r = WireBuffer.wrap(heap);
+		assertEquals(1, r.getU8());
+		assertEquals(1, heap.position(), "not changed");
+		java.nio.ByteBuffer direct = java.nio.ByteBuffer.allocateDirect(2);
+		direct.put((byte)7).put((byte)8).flip();
+		WireBuffer d = WireBuffer.wrap(direct);
+		assertEquals(0x0708, d.getU16());
+		assertEquals(0, direct.position());
+	}
+
+	@Test
+	public void otherReads() {
+		WireBuffer w = new WireBuffer();
+		w.putU32(0x80000000L).putBytes("hi".getBytes(StandardCharsets.US_ASCII)).putBytes(new byte[] {1, 2, 3, 4, 5});
+		WireBuffer r = new WireBuffer(w.toByteArray());
+		assertEquals(Integer.MIN_VALUE, r.getInt32());
+		assertEquals("hi", r.getString(2, StandardCharsets.US_ASCII));
+		assertEquals(1, r.peekU8());
+		r.skip(1);
+		byte[] two = new byte[2];
+		r.getBytes(two);
+		assertArrayEquals(new byte[] {2, 3}, two);
+		assertEquals(2, r.toByteBuffer().remaining());
+		assertArrayEquals(new byte[] {4, 5}, r.getRemaining());
+		assertTrue(r.toString().contains("read="));
+		assertThrows(WireFormatException.class, r::peekU8);
+		assertThrows(WireFormatException.class, () -> r.skip(1));
+		assertThrows(WireFormatException.class, () -> r.getString(1, StandardCharsets.US_ASCII));
+		assertThrows(WireFormatException.class, () -> r.getBytes(new byte[1]));
+		assertThrows(WireFormatException.class, () -> r.slice(1));
+		assertEquals("Need 1 bytes at offset 11, 0 left", assertThrows(WireFormatException.class, r::getU8).getMessage());
+	}
+
+	@Test
+	public void otherWrites() {
+		WireBuffer w = new WireBuffer(16);
+		w.putU32(0);
+		w.setU32(0, 0xcafebabeL);
+		w.putBytes32(new byte[] {9, 8, 7}, 1, 2);
+		WireBuffer r = new WireBuffer(w.toByteArray());
+		assertEquals(0xcafebabeL, r.getU32());
+		assertArrayEquals(new byte[] {8, 7}, r.getBytes32());
+		assertArrayEquals(new byte[] {(byte)0xca, (byte)0xfe}, w.copyOf(0, 2));
+		w.writePosition(2);
+		assertEquals(2, w.writePosition());
+		assertThrows(IllegalArgumentException.class, () -> w.setU16(0, 70000));
+		assertThrows(IllegalArgumentException.class, () -> w.putBytes16(new byte[70000]));
+	}
+
+	@Test
+	public void restoreLimitDoesNotCheck() {
+		WireBuffer r = new WireBuffer(new byte[] {1, 2, 3});
+		int saved = r.pushLimit(1);
+		r.restoreLimit(saved);
+		assertEquals(3, r.remaining());
+		assertEquals(0, new WireBuffer(new byte[] {1}).readPosition());
+		WireBuffer past = new WireBuffer(new byte[] {1, 2});
+		past.getU16();
+		past.writePosition(0);
+		assertEquals(0, past.remaining(), "never negative");
+		assertEquals(0, past.toByteArray().length);
+	}
 }
