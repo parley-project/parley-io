@@ -26,6 +26,8 @@ code behaves the same way on every OS.
 | `BufferedLineInput` | Reads a connection as lines and exact-length blocks (an IMAP literal, an SMTP BDAT chunk). A line interrupted by a read timeout is kept so reading can resume. For protocol implementations that need to mix the two. |
 | `DotStuffingOutputStream` | Writes a dot terminated, dot stuffed body: SMTP `DATA`, POP3 `RETR` and `TOP`, NNTP. |
 | `LineTooLongException` | Thrown by `readLine()` when a line is longer than the limit you set. |
+| `WireBuffer` | A byte array with read and write positions for binary protocols (DNS messages, SSH packets): big-endian numbers, length-prefixed fields, bounds-checked reads. |
+| `WireFormatException` | Thrown by `WireBuffer` when the data is malformed (a read past the end, unused bytes in a record). |
 | `IoUtils` | `closeQuietly(...)`, buffered streams, `copy(in, out)` and `noClose(out)`. |
 
 The line readers and writers:
@@ -208,6 +210,31 @@ try (OutputStream both = new TeeOutputStream(new FileOutputStream("session.log")
 
 If one stream fails, the others are still written. The first error is thrown, and any
 later errors are attached to it as suppressed exceptions.
+
+### Read and write binary protocol messages
+
+```java
+WireBuffer out = new WireBuffer();
+out.putU16(id).putU16(flags);
+int lenAt = out.writePosition();
+out.putU16(0);                      // length, filled in below
+out.putBytes8(name);                // one-byte length, then the bytes
+out.setU16(lenAt, out.writePosition() - lenAt - 2);
+byte[] packet = out.toByteArray();
+
+WireBuffer in = new WireBuffer(packet);
+int id2 = in.getU16();
+int flags2 = in.getU16();
+int saved = in.pushLimit(in.getU16()); // reading stops at the end of the record
+byte[] name2 = in.getBytes8();
+in.popLimit(saved);                    // throws if the record had bytes left over
+```
+
+Every read is checked against the readable end before anything is read or allocated, so a
+length taken from the data can't cause an `ArrayIndexOutOfBoundsException` or a huge
+allocation: a bad message throws `WireFormatException` (a subclass can override `malformed`
+to throw its own exception). `slice(len)` gives a read-only view of the next `len` bytes.
+Following pointers into the data (DNS name compression) is left to the protocol.
 
 ## Building
 
