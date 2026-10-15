@@ -66,7 +66,7 @@ your `pom.xml`:
 <repositories>
     <repository>
         <id>github</id>
-        <url>https://maven.pkg.github.com/tony-bringardner/parley-io</url>
+        <url>https://maven.pkg.github.com/parley-project/parley-io</url>
     </repository>
 </repositories>
 ```
