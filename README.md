@@ -45,7 +45,7 @@ The line readers and writers:
 ## Installation
 
 parley-io is part of **Parley**, a family of Java libraries for implementing internet
-protocols. It is published to GitHub Packages (and, once released there, Maven Central):
+protocols. It is on Maven Central, so no extra repository is needed:
 
 ```xml
 <dependency>
@@ -58,30 +58,6 @@ protocols. It is published to GitHub Packages (and, once released there, Maven C
 > parley-io was previously `us.bringardner:bjl_io` (BjlIo), with packages under
 > `us.bringardner.io`. Moving over means changing the dependency and replacing
 > `us.bringardner.io` with `us.bringardner.parley.io` in imports.
-
-GitHub Packages needs authentication even for public packages. Add the repository to
-your `pom.xml`:
-
-```xml
-<repositories>
-    <repository>
-        <id>github</id>
-        <url>https://maven.pkg.github.com/parley-project/parley-io</url>
-    </repository>
-</repositories>
-```
-
-Then add a matching server to `~/.m2/settings.xml`. The token needs the `read:packages` scope.
-
-```xml
-<servers>
-    <server>
-        <id>github</id>
-        <username>YOUR_GITHUB_USERNAME</username>
-        <password>YOUR_GITHUB_TOKEN</password>
-    </server>
-</servers>
-```
 
 ## Usage
 

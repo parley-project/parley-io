@@ -1,6 +1,6 @@
 # Changelog
 
-## parley-io 1.0.0 (unreleased)
+## parley-io 1.0.0 (2026-10-16)
 
 BjlIo is now **parley-io**, part of the Parley library family. It continues from BjlIo 1.1.0
 (see [BjlIo history](#bjlio-history)); the changes since then are below, with the renames last.
