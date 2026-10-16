@@ -19,9 +19,10 @@ public class TestDotStuffingOutputStream {
 
 	private static String run(boolean normalizeCr, String content) throws IOException {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		DotStuffingOutputStream d = new DotStuffingOutputStream(bytes, normalizeCr);
-		d.write(content.getBytes(StandardCharsets.ISO_8859_1));
-		d.finish();
+		try (DotStuffingOutputStream d = new DotStuffingOutputStream(bytes, normalizeCr)) {
+			d.write(content.getBytes(StandardCharsets.ISO_8859_1));
+			d.finish();
+		}
 		return bytes.toString("ISO-8859-1");
 	}
 
@@ -60,10 +61,11 @@ public class TestDotStuffingOutputStream {
 	public void aCrLfSplitAcrossWritesIsOneLineEnd() throws IOException {
 		for (boolean n : new boolean[] {false, true}) {
 			ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-			DotStuffingOutputStream d = new DotStuffingOutputStream(bytes, n);
-			d.write("a\r".getBytes(StandardCharsets.US_ASCII));
-			d.write("\nb".getBytes(StandardCharsets.US_ASCII));
-			d.finish();
+			try (DotStuffingOutputStream d = new DotStuffingOutputStream(bytes, n)) {
+				d.write("a\r".getBytes(StandardCharsets.US_ASCII));
+				d.write("\nb".getBytes(StandardCharsets.US_ASCII));
+				d.finish();
+			}
 			assertEquals("a\r\nb\r\n.\r\n", bytes.toString("US-ASCII"));
 		}
 	}
@@ -71,12 +73,13 @@ public class TestDotStuffingOutputStream {
 	@Test
 	public void finishIsIdempotentAndNothingFollowsIt() throws IOException {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		DotStuffingOutputStream d = new DotStuffingOutputStream(bytes);
-		d.write('x');
-		d.finish();
-		d.finish();
-		assertEquals("x\r\n.\r\n", bytes.toString("US-ASCII"));
-		assertThrows(IOException.class, () -> d.write('y'));
+		try (DotStuffingOutputStream d = new DotStuffingOutputStream(bytes)) {
+			d.write('x');
+			d.finish();
+			d.finish();
+			assertEquals("x\r\n.\r\n", bytes.toString("US-ASCII"));
+			assertThrows(IOException.class, () -> d.write('y'));
+		}
 	}
 
 	@Test
